@@ -1,0 +1,197 @@
+#%RAML 1.0
+title: "VDC"
+description: "Virtual Datacenter API"
+version: 0.0.1
+mediaType: application/json
+
+securitySchemes:
+  itsyouonline: !include https://raw.githubusercontent.com/gig-cockpit/raml-definitions/master/securityScheme/iyo.raml
+
+resourceTypes:
+  collection: !include https://raw.githubusercontent.com/gig-cockpit/raml-definitions/master/resourceTypes/collection.raml
+  member: !include https://raw.githubusercontent.com/gig-cockpit/raml-definitions/master/resourceTypes/member.raml
+
+securedBy: [itsyouonline]
+
+types:
+  Disk:
+    description: Definition of a virtual disk
+    properties:
+      size:
+        type: integer
+        description: Size of the disk in GiB
+        format: int16
+        required: true
+      type:
+        enum: [boot, db, cache, tmp]
+        description: The type of disk.
+        required: true
+      maxIOps:
+        description: Maximum amount of IOPS the virtual disk should deliver
+        type: integer
+        required: false
+
+  VmCreate:
+    properties:
+      name:
+        type: string
+        minLength: 4
+        maxLength: 128
+        pattern: ^\w+$
+        required: true
+      description:
+        type: string
+        required: false
+      memroy:
+        type: integer
+        description: Amount of memory in MiB
+        format: int16
+        required: true
+      cpu:
+        type: integer
+        description: Number of virtual CPUs
+        format: int8
+        required: true
+      template:
+        type: string
+        description: URL of the template to use
+        # pattern: TODO
+        required: true
+      disks:
+        description: List of extra vdisk
+        type: Disk[]
+        required: false
+      userCloudInit:
+        description: User level cloudinit configuration
+        type: object
+        required: false
+      systemCloudInit:
+        description: System level cloudinit configuration
+        type: object
+        required: false
+
+  Vm:
+    type: VmCreate
+    properties:
+      id:
+        type: string
+        pattern: ^\w+$
+
+  SnapshotCreate:
+    description: Snaptshot of a virtual machine
+    properties:
+      name:
+        type: string
+        minLength: 3
+        maxLength: 128
+        pattern: ^\w+$
+        required: true
+
+  Snapshot:
+    type: SnapshotCreate
+    properties:
+      id:
+        type: string
+        pattern: ^\w+$
+
+  Network:
+    properties:
+
+  User:
+    properties:
+      username:
+        type: string
+        description: ItsYou.online username
+        # pattern: TODO check what are the requirement of iyo regarding username
+
+/vms:
+  type: collection
+  description: Manage your virtual machines
+  post:
+    body:
+      type: VmCreate
+  /{vmid}:
+    type:
+      member
+    put:
+      displayName: UpdateVM
+      description: Change properties of the virtual machine
+      body:
+        type: VmCreate
+    /start:
+      post:
+        displayName: StartVM
+        description: Start the virtual machine
+    /shutdown:
+      delete:
+        displayName: ShutdownVM
+        description: Shutdown the virtual machine
+    /reset:
+      post:
+        displayName: ResetVM
+        description: Reset the virtual machine (force reboot)
+    /pause:
+      put:
+        displayName: PauseVM
+        description: Pause the virtual machine
+    /resume:
+      put:
+        displayName: ResumeVM
+        description: Pause the virtual machine
+    /template:
+      post:
+        displayName: CreateTemplateFromVM
+        description: Create a template from the virtual machine
+    /clone:
+      post:
+        displayName: CloneVM
+        description: Create a clone of the virutal machine
+    /disks:
+      type: collection
+      put:
+        displayName: AttachDiskToVM
+        description: Attach a disk to the virtual machine
+      /{diskid}:
+        type: member
+    /snapshots:
+      type: collection
+      post:
+        body:
+          type: SnapshotCreate
+      /{snapsotid}:
+        type: member
+        /rollback:
+          post:
+            description: Rollback a snapshot of the virtual machine
+    /users:
+      type: collection
+      get:
+        description: List all users that have access rights
+      post:
+        description: Give a registered user access rights
+      /{username}:
+        type: member
+        delete:
+          description: Give user access rights
+    /networks:
+      type: collection
+      post:
+        displayName: AttachVMToNetwork
+        description: Attach the virtual machine to a network
+      /{netid}:
+        delete:
+          displayName: DetachVMFromNetwork
+          description: Detach the virtual macine from a network
+        type: member
+
+/users:
+  description: Manage user access and authorization to your VDC
+  type: collection
+  post:
+    displayName: AuthorizeUser
+    description: Authorize a user
+  /{username}:
+    delete:
+      displayName: UnauthorizeUser
+      description: Unauthorize a user
+    type: member
