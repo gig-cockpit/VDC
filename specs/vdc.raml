@@ -107,9 +107,6 @@ types:
 /vms:
   type: collection
   description: Manage your virtual machines
-  post:
-    body:
-      type: VmCreate
   /{vmid}:
     type:
       member
@@ -155,9 +152,6 @@ types:
         type: member
     /snapshots:
       type: collection
-      post:
-        body:
-          type: SnapshotCreate
       /{snapsotid}:
         type: member
         /rollback:
