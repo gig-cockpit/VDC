@@ -104,79 +104,92 @@ types:
         description: ItsYou.online username
         # pattern: TODO check what are the requirement of iyo regarding username
 
-/vms:
-  type: collection
-  description: Manage your virtual machines
-  /{vmid}:
-    type:
-      member
-    put:
-      displayName: UpdateVM
-      description: Change properties of the virtual machine
-      body:
-        type: VmCreate
-    /start:
-      post:
-        displayName: StartVM
-        description: Start the virtual machine
-    /shutdown:
-      delete:
-        displayName: ShutdownVM
-        description: Shutdown the virtual machine
-    /reset:
-      post:
-        displayName: ResetVM
-        description: Reset the virtual machine (force reboot)
-    /pause:
-      put:
-        displayName: PauseVM
-        description: Pause the virtual machine
-    /resume:
-      put:
-        displayName: ResumeVM
-        description: Pause the virtual machine
-    /template:
-      post:
-        displayName: CreateTemplateFromVM
-        description: Create a template from the virtual machine
-    /clone:
-      post:
-        displayName: CloneVM
-        description: Create a clone of the virutal machine
-    /disks:
+/pools:
+  /{pool}:
+    uriParameters:
+      pool:
+        type: string
+        description: Ressource Pool name
+    /vms:
       type: collection
-      put:
-        displayName: AttachDiskToVM
-        description: Attach a disk to the virtual machine
-      /{diskid}:
-        type: member
-    /snapshots:
-      type: collection
-      /{snapsotid}:
-        type: member
-        /rollback:
+      description: Manage your virtual machines
+      /{vmid}:
+        type:
+          member
+        put:
+          displayName: UpdateVM
+          description: Change properties of the virtual machine
+          body:
+            type: VmCreate
+        /start:
           post:
-            description: Rollback a snapshot of the virtual machine
-    /users:
-      type: collection
-      get:
-        description: List all users that have access rights
-      post:
-        description: Give a registered user access rights
-      /{username}:
-        type: member
-        delete:
-          description: Give user access rights
-    /networks:
-      type: collection
-      post:
-        displayName: AttachVMToNetwork
-        description: Attach the virtual machine to a network
-      /{netid}:
-        delete:
-          displayName: DetachVMFromNetwork
-          description: Detach the virtual macine from a network
-        type: member
+            displayName: StartVM
+            description: Start the virtual machine
+        /shutdown:
+          delete:
+            displayName: ShutdownVM
+            description: Shutdown the virtual machine
+        /reset:
+          post:
+            displayName: ResetVM
+            description: Reset the virtual machine (force reboot)
+        /pause:
+          put:
+            displayName: PauseVM
+            description: Pause the virtual machine
+        /resume:
+          put:
+            displayName: ResumeVM
+            description: Pause the virtual machine
+        /template:
+          post:
+            displayName: CreateTemplateFromVM
+            description: Create a template from the virtual machine
+        /clone:
+          post:
+            displayName: CloneVM
+            description: Create a clone of the virutal machine
+        /disks:
+          type: collection
+          post:
+            body:
+              type: Disk
+          put:
+            displayName: AttachDiskToVM
+            description: Attach a disk to the virtual machine
+          /{diskid}:
+            type: member
+        /snapshots:
+          type: collection
+          /{snapsotid}:
+            type: member
+            /rollback:
+              post:
+                description: Rollback a snapshot of the virtual machine
+        /users:
+          type: collection
+          get:
+            description: List all users that have access rights
+          post:
+            description: Give a registered user access rights
+            body:
+              type: User
+          /{username}:
+            type: member
+            delete:
+              description: Give user access rights
+        /networks:
+          type: collection
+          post:
+            displayName: AttachVMToNetwork
+            description: Attach the virtual machine to a network
+            body:
+              type: Network
+          /{netid}:
+            delete:
+              displayName: DetachVMFromNetwork
+              description: Detach the virtual macine from a network
+            type: member
 
 /users:
   description: Manage user access and authorization to your VDC
@@ -184,6 +197,8 @@ types:
   post:
     displayName: AuthorizeUser
     description: Authorize a user
+    body:
+      type: User
   /{username}:
     delete:
       displayName: UnauthorizeUser
