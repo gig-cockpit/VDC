@@ -161,6 +161,13 @@ types:
           post:
             displayName: CreateTemplateFromVM
             description: Create a template from the virtual machine
+            body:
+              type:
+                properties:
+                  name:
+                    type: string
+                    pattern: ^\w+$
+                    description: Name to give to the template
         /clone:
           post:
             displayName: CloneVM
