@@ -104,7 +104,23 @@ types:
         description: ItsYou.online username
         # pattern: TODO check what are the requirement of iyo regarding username
 
+  Pool:
+    properties:
+      name:
+        type: string
+      apiURL:
+        type: string
+
 /pools:
+  get:
+    description: |
+      List all resource pool available
+    responses:
+      200:
+        description: |
+          Succesfully retrieved all resource pools
+        body:
+          type: Pool[]
   /{pool}:
     uriParameters:
       pool:
